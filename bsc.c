@@ -21,6 +21,8 @@ int main(int argc, char **argv) {
 		return 3;
 	}
 
+	// Priority 0 is max, UINT32_MAX is lowest
+	// See: https://github.com/kr/beanstalkd/blob/v1.3/doc/protocol.txt#l135
 	uint32_t priority = UINT32_MAX;
 	uint32_t delay = 0;
 	uint32_t ttr = 600;
