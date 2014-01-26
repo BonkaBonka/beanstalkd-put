@@ -1,22 +1,27 @@
 #
-BEANSTALK_CLIENT?=beanstalk-client
 
-BINS=bsc
-LIBS=$(BEANSTALK_CLIENT)/libbeanstalk.a
-
-CFLAGS=-Wall -O3 -g -std=c99 -I$(BEANSTALK_CLIENT)
-LDFLAGS=$(LIBS)
+CFLAGS?=-Wall -pedantic -OS -g -std=c99
 PREFIX?=/usr/local
 
-%: %.c
-	$(CC) $(CFLAGS) $< $(LDFLAGS) -o $@
+BEANSTALK_CLIENT?=beanstalk-client
 
-all:	$(BINS)
+$(BEANSTALK_CLIENT)/beanstalk.h:
+	git submodule init
+	git submodule update
+
+$(BEANSTALK_CLIENT)/libbeanstalk.a:
+	cd $(BEANSTALK_CLIENT)
+	make libbeanstalk.a
+
+bsc: bsc.c $(BEANSTALK_CLIENT)/beanstalk.h $(BEANSTALK_CLIENT)/libbeanstalk.a
+	$(CC) $(CFLAGS) -I$(BEANSTALK_CLIENT) bsc.c $(BEANSTALK_CLIENT)/libbeanstalk.a -o bsc
+
+all:	bsc
 
 install:	all
-	strip -s $(BINS)
+	strip -s bsc
 	mkdir -p "$(PREFIX)/bin/"
-	cp $(BINS) "$(PREFIX)/bin/"
+	cp bsc "$(PREFIX)/bin/"
 
 clean:
-	rm -f *.o $(BINS)
+	rm bsc
