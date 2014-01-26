@@ -1,0 +1,3 @@
+[submodule "beanstalk-client"]
+	path = beanstalk-client
+	url = https://github.com/deepfryed/beanstalk-client.git
