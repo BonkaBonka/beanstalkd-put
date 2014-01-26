@@ -21,8 +21,10 @@ int main(int argc, char **argv) {
 		return 3;
 	}
 
-	// socket, priority (0=max), delay (seconds), time-to-run (seconds), data, sizeof(data)
-	int64_t id = bs_put(socket, 0, UINT32_MAX, 60, argv[2], strlen(argv[2]));
+	uint32_t priority = UINT32_MAX;
+	uint32_t delay = 0;
+	uint32_t ttr = 600;
+	int64_t id = bs_put(socket, priority, delay, ttr, argv[2], strlen(argv[2]));
 	if (id == 0) {
 		bs_disconnect(socket);
 		fprintf(stderr, "Unable to put message into queue %s\n", argv[1]);
