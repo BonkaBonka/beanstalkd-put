@@ -5,7 +5,7 @@
 
 int main(int argc, char **argv) {
 	if (argc != 3) {
-		fprintf(stderr, "Usage: %s <queue> <message>\n", argv[0]);
+		fprintf(stderr, "Usage: %s <tube> <message>\n", argv[0]);
 		return 1;
 	}
 
@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
 
 	if (bs_use(socket, argv[1]) == BS_STATUS_FAIL) {
 		bs_disconnect(socket);
-		fprintf(stderr, "Unable to use beanstalk queue %s\n", argv[1]);
+		fprintf(stderr, "Unable to use beanstalk tube %s\n", argv[1]);
 		return 3;
 	}
 
@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
 	int64_t id = bs_put(socket, priority, delay, ttr, argv[2], strlen(argv[2]));
 	if (id == 0) {
 		bs_disconnect(socket);
-		fprintf(stderr, "Unable to put message into queue %s\n", argv[1]);
+		fprintf(stderr, "Unable to put message into tube %s\n", argv[1]);
 		return 4;
 	}
 
