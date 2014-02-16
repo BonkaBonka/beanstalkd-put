@@ -19,20 +19,31 @@ void display_help()
 	puts("  bsc [options] <message>");
 	puts("");
 	puts("Options:");
-	puts("  -t <tube>       which tube to put the job into");
-	puts("  -s <server>     the beanstalk server hostname");
-	puts("  -p <port>       the beanstalk server port number");
-	puts("  -P <priority>   the job priority");
-	puts("  -D <delay>      how long to delay making the job available");
-	puts("  -T <ttr>        how long to wait before returning the job to the queue");
-	puts("  -h              display this help");
+	puts("  -t, --tube      <tube>      beantsalk tube to put the message into");
+	puts("  -s, --server    <server>    beanstalk server hostname");
+	puts("  -p, --port      <port>      beanstalk server port number");
+	puts("  -P, --priority  <priority>  message priority (0=max, UINT32_MAX=min)");
+	puts("  -D, --delay     <delay>     how long before the message becomes available");
+	puts("  -T, --ttr       <ttr>       how long to give the message processor");
+	puts("  -h, --help                  display this help");
 }
 
 int process_args(int argc, char **argv)
 {
+	static struct option long_options[] = {
+		{ "tube",     required_argument, 0, 't' },
+		{ "server",   required_argument, 0, 's' },
+		{ "port",     required_argument, 0, 'p' },
+		{ "priority", required_argument, 0, 'P' },
+		{ "delay",    required_argument, 0, 'D' },
+		{ "ttr",      required_argument, 0, 'T' },
+		{ "help",     no_argument,       0, 'h' },
+		{ NULL,       0,                 0, 0   }
+	};
+
 	int c;
 
-	while((c = getopt(argc, argv, "t:s:p:P:D:T:h")) != -1)
+	while((c = getopt_long(argc, argv, "t:s:p:P:D:T:h", long_options, NULL)) != -1)
 	{
 		switch(c)
 		{
