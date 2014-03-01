@@ -1,4 +1,5 @@
 #include <getopt.h>
+#include <libgen.h>
 #include <limits.h>
 #include <stdio.h>
 
@@ -13,17 +14,17 @@ uint32_t job_priority = UINT32_MAX;
 uint32_t job_delay = 0;
 uint32_t job_ttr = 120;
 
-void display_help()
+void display_help(char *prog)
 {
 	fprintf(stderr, "Usage:\n");
-	fprintf(stderr, "  bsc [options] <message>\n\n");
+	fprintf(stderr, "  %s [options] <job body>\n\n", basename(prog));
 	fprintf(stderr, "Options:\n");
-	fprintf(stderr, "  -t, --tube      <tube>      beantsalk tube to put the message into (%s)\n", tube_name);
+	fprintf(stderr, "  -t, --tube      <tube>      beantsalk tube to put the job into (%s)\n", tube_name);
 	fprintf(stderr, "  -s, --server    <server>    beanstalk server hostname (%s)\n", server_host);
 	fprintf(stderr, "  -p, --port      <port>      beanstalk server port number (%u)\n", server_port);
-	fprintf(stderr, "  -P, --priority  <priority>  message priority (0=max, UINT32_MAX=min) (%u)\n", job_priority);
-	fprintf(stderr, "  -D, --delay     <delay>     how long before the message becomes available (%u)\n", job_delay);
-	fprintf(stderr, "  -T, --ttr       <ttr>       how long to give the message processor (%u)\n", job_ttr);
+	fprintf(stderr, "  -P, --priority  <priority>  job priority, 0=max (%u)\n", job_priority);
+	fprintf(stderr, "  -D, --delay     <delay>     seconds before the job becomes available (%u)\n", job_delay);
+	fprintf(stderr, "  -T, --ttr       <ttr>       seconds to give the job processor (%u)\n", job_ttr);
 	fprintf(stderr, "  -h, --help                  display this help\n\n");
 }
 
@@ -65,14 +66,14 @@ int process_args(int argc, char **argv)
 				job_ttr = atoi(optarg);
 				break;
 			default:
-				display_help();
+				display_help(argv[0]);
 				return -1;
 		}
 	}
 
 	if(optind >= argc || optind + 1 < argc)
 	{
-		display_help();
+		display_help(argv[0]);
 		return -1;
 	}
 
