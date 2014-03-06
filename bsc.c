@@ -82,21 +82,31 @@ int process_args(int argc, char **argv)
 }
 
 int main(int argc, char **argv) {
+	yaml_parser_t parser;
+
+	if(!yaml_parser_initialize(&parser)) {
+		fprintf(stderr, "Unable to initialize YAML parser\n");
+		return 2;
+	}
+
 	int c = process_args(argc, argv);
 	if(c < 1)
 	{
+		yaml_parser_delete(&parser);
 		return 1;
 	}
 
 	int socket = bs_connect(server_host, server_port);
 	if (socket == BS_STATUS_FAIL) {
-		fprintf(stderr, "Unable to connect to beanstalk %s:%d\n", server_host, server_port);
+		fprintf(stderr, "Unable to connect to beanstalkd on %s:%d\n", server_host, server_port);
+		yaml_parser_delete(&parser);
 		return 2;
 	}
 
 	if (bs_use(socket, tube_name) == BS_STATUS_FAIL) {
 		bs_disconnect(socket);
 		fprintf(stderr, "Unable to use beanstalk tube %s\n", tube_name);
+		yaml_parser_delete(&parser);
 		return 3;
 	}
 
@@ -104,12 +114,15 @@ int main(int argc, char **argv) {
 	if (id == 0) {
 		bs_disconnect(socket);
 		fprintf(stderr, "Unable to put message into tube %s\n", argv[c]);
+		yaml_parser_delete(&parser);
 		return 4;
 	}
 
 	printf("put job id: %ld\n", id);
 
 	bs_disconnect(socket);
+
+	yaml_parser_delete(&parser);
 	
 	return 0;
 }
