@@ -169,7 +169,7 @@ int main(int argc, char **argv) {
 
 	int64_t id = bs_put(socket, job_priority, job_delay, job_ttr, (char *)payload, payload_size);
 	if (id == 0) {
-		fprintf(stderr, "Unable to put message into tube %s\n", argv[c]);
+		fprintf(stderr, "Unable to put message into tube %s\n", payload);
 		free(payload);
 		bs_disconnect(socket);
 		return 3;
