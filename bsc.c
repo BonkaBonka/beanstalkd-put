@@ -103,20 +103,20 @@ int main(int argc, char **argv) {
 	}
 
 	if (bs_use(socket, tube_name) == BS_STATUS_FAIL) {
-		bs_disconnect(socket);
 		fprintf(stderr, "Unable to use beanstalk tube %s\n", tube_name);
+		bs_disconnect(socket);
 		return 2;
 	}
 
 	if (bs_stats(socket, (char **)&yaml) == BS_STATUS_FAIL) {
-		bs_disconnect(socket);
 		fprintf(stderr, "Unable to get beanstalk stats\n");
+		bs_disconnect(socket);
 		return 2;
 	}
 
 	if(!yaml_parser_initialize(&parser)) {
-		bs_disconnect(socket);
 		fprintf(stderr, "Unable to initialize YAML parser\n");
+		bs_disconnect(socket);
 		return 2;
 	}
 
@@ -125,9 +125,9 @@ int main(int argc, char **argv) {
 
 	while (parse_state > 0) {
 		if (!yaml_parser_parse(&parser, &event)) {
+			fprintf(stderr, "Unable to parse beanstalk stats\n");
 			yaml_parser_delete(&parser);
 			bs_disconnect(socket);
-			fprintf(stderr, "Unable to parse beanstalk stats\n");
 			return 2;
 		}
 
@@ -159,9 +159,9 @@ int main(int argc, char **argv) {
 	payload_size = strlen(argv[c]);
 
 	if (payload_size > max_payload_size) {
+		fprintf(stderr, "Payload too large to send through beanstalkd %ld > %ld\n", payload_size, max_payload_size);
 		free(payload);
 		bs_disconnect(socket);
-		fprintf(stderr, "Payload too large to send through beanstalkd %ld > %ld\n", payload_size, max_payload_size);
 		return 3;
 	}
 
@@ -169,9 +169,9 @@ int main(int argc, char **argv) {
 
 	int64_t id = bs_put(socket, job_priority, job_delay, job_ttr, (char *)payload, payload_size);
 	if (id == 0) {
+		fprintf(stderr, "Unable to put message into tube %s\n", argv[c]);
 		free(payload);
 		bs_disconnect(socket);
-		fprintf(stderr, "Unable to put message into tube %s\n", argv[c]);
 		return 3;
 	}
 
