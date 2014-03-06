@@ -154,7 +154,7 @@ int main(int argc, char **argv) {
 
 	yaml_parser_delete(&parser);
 
-	// Add an extra byte to ensure null termination
+	// Add an extra byte to ensure null termination and to detect stdin overflow
 	payload = (unsigned char *)calloc(max_payload_size + 1, 1);
 	payload_size = strlen(argv[c]);
 
@@ -166,6 +166,33 @@ int main(int argc, char **argv) {
 	}
 
 	memcpy(payload, argv[c], payload_size);
+
+	if (payload_size == 1 && payload[0] == '-') {
+		payload_size = 0;
+
+		do {
+			c = read(STDIN_FILENO, payload + payload_size, (1 + max_payload_size) - payload_size);
+			if (c < 0) {
+				perror("reading from stdin");
+				free(payload);
+				bs_disconnect(socket);
+				return 3;
+			}
+			payload_size += c;
+		} while (c > 0);
+
+		if (payload_size > max_payload_size) {
+			fprintf(stderr, "Payload too large to send through beanstalkd %ld > %ld\n", payload_size, max_payload_size);
+			free(payload);
+			bs_disconnect(socket);
+			return 3;
+		} else if (payload_size == 0) {
+			fprintf(stderr, "No payload read from stdin\n");
+			free(payload);
+			bs_disconnect(socket);
+			return 3;
+		}
+	}
 
 	int64_t id = bs_put(socket, job_priority, job_delay, job_ttr, (char *)payload, payload_size);
 	if (id == 0) {
