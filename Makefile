@@ -11,10 +11,10 @@ $(BEANSTALK_CLIENT)/beanstalk.h:
 	git submodule init
 	git submodule update
 
-$(BEANSTALK_CLIENT)/libbeanstalk.a:
-	sh -c "cd $(BEANSTALK_CLIENT); make -f makefile libbeanstalk.a"
+$(BEANSTALK_CLIENT)/libbeanstalk.a: $(BEANSTALK_CLIENT)/beanstalk.h
+	sh -cx "cd $(BEANSTALK_CLIENT); make -f makefile libbeanstalk.a"
 
-bsc: bsc.c $(BEANSTALK_CLIENT)/beanstalk.h $(BEANSTALK_CLIENT)/libbeanstalk.a
+bsc: bsc.c $(BEANSTALK_CLIENT)/libbeanstalk.a
 	$(CC) $(CFLAGS) -I$(BEANSTALK_CLIENT) bsc.c $(BEANSTALK_CLIENT)/libbeanstalk.a -o bsc
 
 install:	all
