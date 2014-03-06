@@ -27,6 +27,7 @@ void display_help(char *prog)
 	fprintf(stderr, "  -D, --delay     <delay>     seconds before the job becomes available (%u)\n", job_delay);
 	fprintf(stderr, "  -T, --ttr       <ttr>       seconds to give the job processor (%u)\n", job_ttr);
 	fprintf(stderr, "  -h, --help                  display this help\n\n");
+	fprintf(stderr, "If \"job body\" is \"-\", then the body content will be read from stdin.\n\n");
 }
 
 int process_args(int argc, char **argv)
