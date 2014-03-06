@@ -177,7 +177,7 @@ int main(int argc, char **argv) {
 
 	free(payload);
 
-	printf("put job id: %ld\n", id);
+	printf("%ld\n", id);
 
 	bs_disconnect(socket);
 
