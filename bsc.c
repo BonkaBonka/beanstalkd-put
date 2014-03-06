@@ -83,46 +83,103 @@ int process_args(int argc, char **argv)
 
 int main(int argc, char **argv) {
 	yaml_parser_t parser;
-
-	if(!yaml_parser_initialize(&parser)) {
-		fprintf(stderr, "Unable to initialize YAML parser\n");
-		return 2;
-	}
+	yaml_event_t event;
+	unsigned char *yaml;
+	unsigned char *payload;
+	uint8_t parse_state;
+	uint64_t max_payload_size = 0;
+	uint64_t payload_size = 0;
 
 	int c = process_args(argc, argv);
 	if(c < 1)
 	{
-		yaml_parser_delete(&parser);
 		return 1;
 	}
 
 	int socket = bs_connect(server_host, server_port);
 	if (socket == BS_STATUS_FAIL) {
 		fprintf(stderr, "Unable to connect to beanstalkd on %s:%d\n", server_host, server_port);
-		yaml_parser_delete(&parser);
 		return 2;
 	}
 
 	if (bs_use(socket, tube_name) == BS_STATUS_FAIL) {
 		bs_disconnect(socket);
 		fprintf(stderr, "Unable to use beanstalk tube %s\n", tube_name);
-		yaml_parser_delete(&parser);
+		return 2;
+	}
+
+	if (bs_stats(socket, (char **)&yaml) == BS_STATUS_FAIL) {
+		bs_disconnect(socket);
+		fprintf(stderr, "Unable to get beanstalk stats\n");
+		return 2;
+	}
+
+	if(!yaml_parser_initialize(&parser)) {
+		bs_disconnect(socket);
+		fprintf(stderr, "Unable to initialize YAML parser\n");
+		return 2;
+	}
+
+	yaml_parser_set_input_string(&parser, yaml, strlen((char *)yaml));
+	parse_state = 1;
+
+	while (parse_state > 0) {
+		if (!yaml_parser_parse(&parser, &event)) {
+			yaml_parser_delete(&parser);
+			bs_disconnect(socket);
+			fprintf(stderr, "Unable to parse beanstalk stats\n");
+			return 2;
+		}
+
+		switch(event.type) {
+			case YAML_STREAM_END_EVENT:
+				parse_state = 0;
+				break;
+			case YAML_SCALAR_EVENT:
+				if (parse_state == 1 && strncmp("max-job-size", (char *)event.data.scalar.value, 12) == 0) {
+					parse_state = 2;
+				} else if (parse_state == 2) {
+					max_payload_size = atoi((char *)event.data.scalar.value);
+					parse_state = 0;
+				}
+				break;
+			default:
+				break;
+		}
+
+		yaml_event_delete(&event);
+	}
+
+	free(yaml);
+
+	yaml_parser_delete(&parser);
+
+	// Add an extra byte to ensure null termination
+	payload = (unsigned char *)calloc(max_payload_size + 1, 1);
+	payload_size = strlen(argv[c]);
+
+	if (payload_size > max_payload_size) {
+		free(payload);
+		bs_disconnect(socket);
+		fprintf(stderr, "Payload too large to send through beanstalkd %ld > %ld\n", payload_size, max_payload_size);
 		return 3;
 	}
 
-	int64_t id = bs_put(socket, job_priority, job_delay, job_ttr, argv[c], strlen(argv[c]));
+	memcpy(payload, argv[c], payload_size);
+
+	int64_t id = bs_put(socket, job_priority, job_delay, job_ttr, (char *)payload, payload_size);
 	if (id == 0) {
+		free(payload);
 		bs_disconnect(socket);
 		fprintf(stderr, "Unable to put message into tube %s\n", argv[c]);
-		yaml_parser_delete(&parser);
-		return 4;
+		return 3;
 	}
+
+	free(payload);
 
 	printf("put job id: %ld\n", id);
 
 	bs_disconnect(socket);
 
-	yaml_parser_delete(&parser);
-	
 	return 0;
 }
