@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "beanstalk.h"
+#include "yaml.h"
 
 char *tube_name = "default";
 char *server_host = "localhost";
