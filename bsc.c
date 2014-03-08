@@ -6,8 +6,7 @@
 
 #include "beanstalk.h"
 
-#define MAX_JOB_SIZE "max-job-size: "
-#define MAX_JOB_SIZE_LEN strlen(MAX_JOB_SIZE)
+#define MAX_JOB_SIZE_KEY "max-job-size: "
 
 char *tube_name = "default";
 char *server_host = "localhost";
@@ -84,10 +83,10 @@ int process_args(int argc, char **argv)
 
 int main(int argc, char **argv) {
 	unsigned char *yaml;
-	unsigned char *payload;
-	unsigned char *server_job_size;
-	uint64_t max_payload_size = 0;
-	uint64_t payload_size = 0;
+	unsigned char *job;
+	unsigned char *max_job_size_key;
+	uint64_t max_job_size = 0;
+	uint64_t job_size = 0;
 
 	int c = process_args(argc, argv);
 	if (c < 1) {
@@ -101,77 +100,75 @@ int main(int argc, char **argv) {
 	}
 
 	if (bs_use(socket, tube_name) == BS_STATUS_FAIL) {
-		fprintf(stderr, "Unable to use beanstalk tube %s\n", tube_name);
+		fprintf(stderr, "Unable to use beanstalkd tube %s\n", tube_name);
 		bs_disconnect(socket);
 		return 2;
 	}
 
 	if (bs_stats(socket, (char **)&yaml) == BS_STATUS_FAIL) {
-		fprintf(stderr, "Unable to get beanstalk stats\n");
+		fprintf(stderr, "Unable to get beanstalkd stats\n");
 		bs_disconnect(socket);
 		return 2;
 	}
 
-	if ((server_job_size = (unsigned char *)strstr((char *)yaml, MAX_JOB_SIZE)) == NULL) {
-		fprintf(stderr, "Unable to determine max job size\n");
+	if ((max_job_size_key = (unsigned char *)strstr((char *)yaml, MAX_JOB_SIZE_KEY)) == NULL) {
+		fprintf(stderr, "Unable to determine beanstalkd's max job size\n");
 		free(yaml);
 		bs_disconnect(socket);
 		return 2;
 	}
 
-	max_payload_size = atoi((char *)server_job_size + MAX_JOB_SIZE_LEN);
+	max_job_size = atoi((char *)max_job_size_key + strlen(MAX_JOB_SIZE_KEY));
 
 	free(yaml);
 
-	// Add an extra byte to ensure null termination and to detect stdin overflow
-	payload = (unsigned char *)calloc(max_payload_size + 1, 1);
-	payload_size = strlen(argv[c]);
-
-	if (payload_size > max_payload_size) {
-		fprintf(stderr, "Payload too large to send through beanstalkd %ld > %ld\n", payload_size, max_payload_size);
-		free(payload);
+	job_size = strlen(argv[c]);
+	if (job_size > max_job_size) {
+		fprintf(stderr, "Job too large to send through beanstalkd %ld > %ld\n", job_size, max_job_size);
 		bs_disconnect(socket);
 		return 3;
 	}
 
-	memcpy(payload, argv[c], payload_size);
+	// Add an extra byte to ensure null termination and to detect stdin overflow
+	job = (unsigned char *)calloc(max_job_size + 1, 1);
+	memcpy(job, argv[c], job_size);
 
-	if (payload_size == 1 && payload[0] == '-') {
-		payload_size = 0;
+	if (job_size == 1 && job[0] == '-') {
+		job_size = 0;
 
 		do {
-			c = read(STDIN_FILENO, payload + payload_size, (1 + max_payload_size) - payload_size);
+			c = read(STDIN_FILENO, job + job_size, (1 + max_job_size) - job_size);
 			if (c < 0) {
 				perror("reading from stdin");
-				free(payload);
+				free(job);
 				bs_disconnect(socket);
 				return 3;
 			}
-			payload_size += c;
+			job_size += c;
 		} while (c > 0);
 
-		if (payload_size > max_payload_size) {
-			fprintf(stderr, "Payload too large to send through beanstalkd %ld > %ld\n", payload_size, max_payload_size);
-			free(payload);
+		if (job_size > max_job_size) {
+			fprintf(stderr, "Job too large to send through beanstalkd %ld > %ld\n", job_size, max_job_size);
+			free(job);
 			bs_disconnect(socket);
 			return 3;
-		} else if (payload_size == 0) {
-			fprintf(stderr, "No payload read from stdin\n");
-			free(payload);
+		} else if (job_size == 0) {
+			fprintf(stderr, "No job read from stdin\n");
+			free(job);
 			bs_disconnect(socket);
 			return 3;
 		}
 	}
 
-	int64_t id = bs_put(socket, job_priority, job_delay, job_ttr, (char *)payload, payload_size);
+	int64_t id = bs_put(socket, job_priority, job_delay, job_ttr, (char *)job, job_size);
 	if (id == 0) {
-		fprintf(stderr, "Unable to put message into tube %s\n", payload);
-		free(payload);
+		fprintf(stderr, "Error putting job into tube\n");
+		free(job);
 		bs_disconnect(socket);
 		return 3;
 	}
 
-	free(payload);
+	free(job);
 
 	printf("%ld\n", id);
 
