@@ -48,10 +48,8 @@ int process_args(int argc, char **argv)
 
 	int c;
 
-	while((c = getopt_long(argc, argv, "t:s:p:P:D:T:h", long_options, NULL)) != -1)
-	{
-		switch(c)
-		{
+	while ((c = getopt_long(argc, argv, "t:s:p:P:D:T:h", long_options, NULL)) != -1) {
+		switch (c) {
 			case 't':
 				tube_name = optarg;
 				break;
@@ -76,8 +74,7 @@ int process_args(int argc, char **argv)
 		}
 	}
 
-	if(optind >= argc || optind + 1 < argc)
-	{
+	if (optind >= argc || optind + 1 < argc) {
 		display_help(argv[0]);
 		return -1;
 	}
@@ -93,8 +90,7 @@ int main(int argc, char **argv) {
 	uint64_t payload_size = 0;
 
 	int c = process_args(argc, argv);
-	if(c < 1)
-	{
+	if (c < 1) {
 		return 1;
 	}
 
