@@ -2,9 +2,12 @@
 #include <libgen.h>
 #include <limits.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "beanstalk.h"
-#include "yaml.h"
+
+#define MAX_JOB_SIZE "max-job-size: "
+#define MAX_JOB_SIZE_LEN strlen(MAX_JOB_SIZE)
 
 char *tube_name = "default";
 char *server_host = "localhost";
@@ -83,11 +86,9 @@ int process_args(int argc, char **argv)
 }
 
 int main(int argc, char **argv) {
-	yaml_parser_t parser;
-	yaml_event_t event;
 	unsigned char *yaml;
 	unsigned char *payload;
-	uint8_t parse_state;
+	unsigned char *server_job_size;
 	uint64_t max_payload_size = 0;
 	uint64_t payload_size = 0;
 
@@ -115,45 +116,16 @@ int main(int argc, char **argv) {
 		return 2;
 	}
 
-	if(!yaml_parser_initialize(&parser)) {
-		fprintf(stderr, "Unable to initialize YAML parser\n");
+	if ((server_job_size = (unsigned char *)strstr((char *)yaml, MAX_JOB_SIZE)) == NULL) {
+		fprintf(stderr, "Unable to determine max job size\n");
+		free(yaml);
 		bs_disconnect(socket);
 		return 2;
 	}
 
-	yaml_parser_set_input_string(&parser, yaml, strlen((char *)yaml));
-	parse_state = 1;
-
-	while (parse_state > 0) {
-		if (!yaml_parser_parse(&parser, &event)) {
-			fprintf(stderr, "Unable to parse beanstalk stats\n");
-			yaml_parser_delete(&parser);
-			bs_disconnect(socket);
-			return 2;
-		}
-
-		switch(event.type) {
-			case YAML_STREAM_END_EVENT:
-				parse_state = 0;
-				break;
-			case YAML_SCALAR_EVENT:
-				if (parse_state == 1 && strncmp("max-job-size", (char *)event.data.scalar.value, 12) == 0) {
-					parse_state = 2;
-				} else if (parse_state == 2) {
-					max_payload_size = atoi((char *)event.data.scalar.value);
-					parse_state = 0;
-				}
-				break;
-			default:
-				break;
-		}
-
-		yaml_event_delete(&event);
-	}
+	max_payload_size = atoi((char *)server_job_size + MAX_JOB_SIZE_LEN);
 
 	free(yaml);
-
-	yaml_parser_delete(&parser);
 
 	// Add an extra byte to ensure null termination and to detect stdin overflow
 	payload = (unsigned char *)calloc(max_payload_size + 1, 1);
