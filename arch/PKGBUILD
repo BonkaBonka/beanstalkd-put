@@ -1,0 +1,23 @@
+# Maintainer: James Cook <bonkabonka@gmail.com>
+
+pkgname=beanstalkd-put
+pkgver=1.0
+pkgrel=1
+pkgdesc="Simple CLI tool to put jobs into beanstalkd tubes"
+arch=('i686' 'x86_64')
+url="https://github.com/BonkaBonka/beanstalkd-put"
+license=('BSD')
+groups=()
+depends=()
+source=(https://github.com/BonkaBonka/beanstalkd-put/archive/v${pkgver}.tar.gz)
+md5sums=()
+
+build() {
+  cd "$srcdir"/$pkgname-$pkgver
+  make
+}
+
+package() {
+  cd "$srcdir"/$pkgname-$pkgver
+  PREFIX="$pkgdir"/usr make install
+}
