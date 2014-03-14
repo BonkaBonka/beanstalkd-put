@@ -17,6 +17,9 @@ $(BEANSTALK_CLIENT)/libbeanstalk.a: $(BEANSTALK_CLIENT)/beanstalk.h
 beanstalkd-put: beanstalkd-put.c $(BEANSTALK_CLIENT)/libbeanstalk.a
 	$(CC) $(CFLAGS) -I$(BEANSTALK_CLIENT) beanstalkd-put.c $(BEANSTALK_CLIENT)/libbeanstalk.a -o beanstalkd-put
 
+beanstalkd-put.1: beanstalkd-put.1.ronn
+	ronn --organization="beanstalkd-put 1.0" --warnings --roff $<
+
 install:	all
 	strip -s beanstalkd-put
 	mkdir -p "$(PREFIX)/bin/"

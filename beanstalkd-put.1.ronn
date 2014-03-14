@@ -1,0 +1,72 @@
+beanstalkd-put(1) -- put a job into a beanstalkd tube
+=====================================================
+
+## SYNOPSIS
+
+ `beanstalkd-put` [[options]] <<job-body>>
+
+## DESCRIPTION
+
+**beanstalkd-put** is a simple CLI utility to insert jobs into beanstalkd
+tubes.  The job body can either be specified on the command line or it
+can be read from `stdin`.
+
+## OPTIONS
+
+  * `-t` <tube>, `--tube`=<tube>:
+    The beanstalkd tube to put the job into.
+  * `-s` <server>, `--server`=<server>:
+    The beanstalkd server hostname.
+  * `-p` <port>, `--port`=<port>:
+    The beanstalkd server port number.
+  * `-P` <priority>, `--priority`=<priority>:
+    The job priority.  Lower numbers are higher priority, thus maximum
+    priority is 0 and minumum priority is 4294967295 (UINT32_MAX).
+  * `-D` <delay>, `--delay`=<delay>:
+    The number of seconds before the job becomes available to processors.
+  * `-T` <ttr>, `--ttr`=<ttr>:
+    The number of seconds to allow a processor to complete the task
+    without having to `touch` the job to request more time.  A value of
+    0 gets silently converted into a 1 by the server, according
+    to [the beanstalkd 1.3 protocol document](https://github.com/kr/beanstalkd/tree/v1.3/doc/protocol.txt#L142)
+  * `-h`, `--help`:
+	Usage help.
+
+## JOB BODY
+
+If the "job-body" is specified as "-" then the body is read from stdin.
+
+## OUTPUT
+
+After successfully putting the job into the tube, the job ID is printed
+to stdout.  The ID isn't surrounded by anything and is therefore easily
+captured for use in a script.
+
+## EXAMPLES
+
+Put "Hello World" in the default tube:
+
+    $ beanstalkd-put "Hello World"
+
+Pipe "Hello World" into the "howdy" tube:
+
+    $ echo "Hello World" | beanstalkd-put --tube=howdy -
+
+Capture the job ID for display in a message:
+
+    $ JID=$(beanstalkd-put "Hello World")
+    $ echo "The greeting was queued as job number $JID"
+
+## EXIT CODES
+
+There are three basic errors:
+
+  1 - Error while parsing CLI options.
+
+  2 - Error communicating to beanstalkd.
+
+  3 - Error submitting job body to beanstalkd.
+
+## AUTHOR
+
+**James Cook** <bonkabonka@gmail.com>.
