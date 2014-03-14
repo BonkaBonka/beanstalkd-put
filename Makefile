@@ -28,4 +28,4 @@ install:	all
 	cp beanstalkd-put.1 "$(PREFIX)/share/man/man1/"
 
 clean:
-	rm beanstalkd-put
+	rm -f beanstalkd-put
