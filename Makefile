@@ -24,6 +24,8 @@ install:	all
 	strip -s beanstalkd-put
 	mkdir -p "$(PREFIX)/bin/"
 	cp beanstalkd-put "$(PREFIX)/bin/"
+	mkdir -p "$(PREFIX)/share/man/man1/"
+	cp beanstalkd-put.1 "$(PREFIX)/share/man/man1/"
 
 clean:
 	rm beanstalkd-put
