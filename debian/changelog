@@ -1,0 +1,5 @@
+beanstalkd-put (1.0-1) unstable; urgency=low
+
+  * Initial release.
+
+ -- James Cook <bonkabonka@gmail.com>  Fri, 14 Mar 2014 15:23:31 -0400

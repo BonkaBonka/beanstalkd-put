@@ -1,0 +1,15 @@
+Source: beanstalkd-put
+Section: misc
+Priority: extra
+Maintainer: James Cook <bonkabonka@gmail.com>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.3
+Homepage: https://github.com/BonkaBonka/beanstalkd-put
+
+Package: beanstalkd-put
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Simple CLI tool to put jobs into beanstalkd tubes.
+ beanstalkd-put is a simple CLI utility to insert jobs into beanstalkd
+ tubes.  The job body can either be specified on the command line or it
+ can be read from stdin.
