@@ -9,15 +9,15 @@ url="https://github.com/BonkaBonka/beanstalkd-put"
 license=('BSD')
 groups=()
 depends=()
-source=(https://github.com/BonkaBonka/beanstalkd-put/archive/v${pkgver}.tar.gz)
+source=(git+https://github.com/BonkaBonka/beanstalkd-put.git#tag=v${pkgver})
 md5sums=()
 
 build() {
-  cd "$srcdir"/$pkgname-$pkgver
+  cd "$srcdir"/$pkgname
   make
 }
 
 package() {
-  cd "$srcdir"/$pkgname-$pkgver
+  cd "$srcdir"/$pkgname
   PREFIX="$pkgdir"/usr make install
 }
