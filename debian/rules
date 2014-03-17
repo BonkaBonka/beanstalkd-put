@@ -13,4 +13,4 @@
 	dh $@ 
 
 override_dh_auto_install:
-	PREFIX=$(CURDIR)/debian/beanstalkd-put/usr make install
+	$(MAKE) PREFIX=$(CURDIR)/debian/beanstalkd-put/usr install
