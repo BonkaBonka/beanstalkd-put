@@ -1,0 +1,48 @@
+beanstalkd-kick(1) -- kick job(s) in a beanstalkd tube
+======================================================
+
+## SYNOPSIS
+
+ `beanstalkd-kick` [[options]] [[job-count]]
+
+## DESCRIPTION
+
+**beanstalkd-kick** is a simple CLI utility to kick buried jobs in beanstalkd
+tubes.
+
+## OPTIONS
+
+  * `-t` <tube>, `--tube`=<tube>:
+    The beanstalkd tube to put the job into.
+  * `-s` <server>, `--server`=<server>:
+    The beanstalkd server hostname.
+  * `-p` <port>, `--port`=<port>:
+    The beanstalkd server port number.
+  * `-h`, `--help`:
+	Usage help.
+
+## JOB COUNT
+
+The number of buried jobs to kick, defaults to 1.
+
+## OUTPUT
+
+None on success.
+
+## EXAMPLES
+
+Kick one job in the default tube:
+
+    $ beanstalkd-kick
+
+## EXIT CODES
+
+There are three basic errors:
+
+  1 - Error while parsing CLI options.
+
+  2 - Error communicating to beanstalkd.
+
+## AUTHOR
+
+**James Cook** <bonkabonka@gmail.com>.
