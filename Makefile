@@ -14,7 +14,7 @@ MANS?=beanstalkd-put.1 beanstalkd-kick.1
 %.1: %.1.ronn
 	ronn --organization="beanstalkd-put 1.0" --warnings --roff $<
 
-all:	$(BINS)
+all:	$(BINS) $(MANS)
 
 $(BEANSTALK_CLIENT)/beanstalk.h:
 	git submodule init
@@ -28,7 +28,7 @@ install:	all
 	mkdir -p "$(PREFIX)/bin/"
 	cp $(BINS) "$(PREFIX)/bin/"
 	mkdir -p "$(PREFIX)/share/man/man1/"
-	cp beanstalkd-put.1 "$(PREFIX)/share/man/man1/"
+	cp $(MANS) "$(PREFIX)/share/man/man1/"
 
 clean:
 	rm -f $(BINS) $(MANS)
