@@ -19,7 +19,7 @@ void display_help(char *prog)
 	fprintf(stderr, "Usage:\n");
 	fprintf(stderr, "  %s [options] [job-count]\n\n", basename(prog));
 	fprintf(stderr, "Options:\n");
-	fprintf(stderr, "  -t, --tube      <tube>      beantsalk tube to put the job into (%s)\n", tube_name);
+	fprintf(stderr, "  -t, --tube      <tube>      beanstalk tube to put the job into (%s)\n", tube_name);
 	fprintf(stderr, "  -s, --server    <server>    beanstalk server hostname (%s)\n", server_host);
 	fprintf(stderr, "  -p, --port      <port>      beanstalk server port number (%u)\n", server_port);
 	fprintf(stderr, "  -h, --help                  display this help\n\n");
