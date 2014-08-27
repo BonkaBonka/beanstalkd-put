@@ -1,3 +1,9 @@
+beanstalkd-put (2.0-1) unstable; urgency=low
+
+  * Add kick utility.
+
+ -- James Cook <bonkabonka@gmail.com>  Wed, 27 Aug 2014 13:32:19 -0400
+
 beanstalkd-put (1.0-1) unstable; urgency=low
 
   * Initial release.

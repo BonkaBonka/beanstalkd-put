@@ -10,14 +10,14 @@
 
 NOTE: This is a terrible, awful way to make this go but [*shikata ga nai*](https://en.wikipedia.org/wiki/Shikata_ga_nai)[^1].
 
-	git clone https://github.com/BonkaBonka/beanstalkd-put.git beanstalkd-put-1.0
-	cd beanstalkd-put-1.0
+	git clone https://github.com/BonkaBonka/beanstalkd-put.git beanstalkd-put-2.0
+	cd beanstalkd-put-2.0
 	git submodule init
 	git submodule update
 	cd ..
-	tar zcf v1.0.tar.gz beanstalkd-put-1.0
+	tar zcf v2.0.tar.gz beanstalkd-put-2.0
 
-	rpmbuild -tb v1.0.tar.gz
+	rpmbuild -tb v2.0.tar.gz
 
 ### Arch Linux
 

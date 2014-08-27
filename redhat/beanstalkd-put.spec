@@ -1,6 +1,6 @@
 Summary: Simple CLI tool to put jobs into beanstalkd tubes.
 Name: beanstalkd-put
-Version: 1.0
+Version: 2.0
 Release: 1
 Group: Applications/Communications
 License: BSD-type
