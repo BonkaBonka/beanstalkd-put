@@ -1,4 +1,6 @@
+#include <errno.h>
 #include <getopt.h>
+#include <inttypes.h>
 #include <libgen.h>
 #include <limits.h>
 #include <stdio.h>
@@ -44,7 +46,14 @@ int process_args(int argc, char **argv)
 				server_host = optarg;
 				break;
 			case 'p':
-				server_port = atoi(optarg);
+				if (sscanf(optarg, "%d", &server_port) != 1) {
+					if (errno != 0) {
+						perror("sscanf: server port");
+					} else {
+						fprintf(stderr, "Non-numeric characters in server port\n");
+					}
+					return -1;
+				}
 				break;
 			default:
 				display_help(argv[0]);
@@ -66,9 +75,16 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	int64_t count = 1;
+	uint64_t count = 1;
 	if (c < argc) {
-		count = atoi(argv[c]);
+		if (sscanf(argv[c], "%"SCNu64, &count) != 1) {
+			if (errno != 0) {
+				perror("sscanf: kick count");
+			} else {
+				fprintf(stderr, "Non-numeric characters in kick count\n");
+			}
+			return -1;
+		}
 	}
 
 	int socket = bs_connect(server_host, server_port);

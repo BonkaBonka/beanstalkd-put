@@ -1,4 +1,6 @@
+#include <errno.h>
 #include <getopt.h>
+#include <inttypes.h>
 #include <libgen.h>
 #include <limits.h>
 #include <stdio.h>
@@ -56,16 +58,44 @@ int process_args(int argc, char **argv)
 				server_host = optarg;
 				break;
 			case 'p':
-				server_port = atoi(optarg);
+				if (sscanf(optarg, "%d", &server_port) != 1) {
+					if (errno != 0) {
+						perror("sscanf: server port");
+					} else {
+						fprintf(stderr, "Non-numeric characters in server port\n");
+					}
+					return -1;
+				}
 				break;
 			case 'P':
-				job_priority = atoi(optarg);
+				if (sscanf(optarg, "%"SCNu32, &job_priority) != 1) {
+					if (errno != 0) {
+						perror("sscanf: job priority");
+					} else {
+						fprintf(stderr, "Non-numeric characters in job priority\n");
+					}
+					return -1;
+				}
 				break;
 			case 'D':
-				job_delay = atoi(optarg);
+				if (sscanf(optarg, "%"SCNu32, &job_delay) != 1) {
+					if (errno != 0) {
+						perror("sscanf: job delay");
+					} else {
+						fprintf(stderr, "Non-numeric characters in job delay\n");
+					}
+					return -1;
+				}
 				break;
 			case 'T':
-				job_ttr = atoi(optarg);
+				if (sscanf(optarg, "%"SCNu32, &job_ttr) != 1) {
+					if (errno != 0) {
+						perror("sscanf: job ttr");
+					} else {
+						fprintf(stderr, "Non-numeric characters in job ttr\n");
+					}
+					return -1;
+				}
 				break;
 			default:
 				display_help(argv[0]);
@@ -118,7 +148,16 @@ int main(int argc, char **argv) {
 		return 2;
 	}
 
-	max_job_size = atoi((char *)max_job_size_key + strlen(MAX_JOB_SIZE_KEY));
+	if (sscanf((char *)max_job_size_key + strlen(MAX_JOB_SIZE_KEY), "%"SCNu64, &max_job_size) != 1) {
+		if (errno != 0) {
+			perror("sscanf: max job size");
+		} else {
+			fprintf(stderr, "Non-numeric characters in max job size\n");
+		}
+		free(yaml);
+		bs_disconnect(socket);
+		return 2;
+	}
 
 	free(yaml);
 
