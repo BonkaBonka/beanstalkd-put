@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
 			} else {
 				fprintf(stderr, "Non-numeric characters in kick count\n");
 			}
-			return -1;
+			return 1;
 		}
 	}
 
