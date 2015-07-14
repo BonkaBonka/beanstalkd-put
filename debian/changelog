@@ -1,3 +1,9 @@
+beanstalkd-put (2.1-1) unstable; urgency=low
+
+  * Add quiet CLI option.
+
+ -- James Cook <bonkabonka@gmail.com>  Tue, 14 Jul 2015 15:44:33 -0400
+
 beanstalkd-put (2.0-1) unstable; urgency=low
 
   * Add kick utility.
