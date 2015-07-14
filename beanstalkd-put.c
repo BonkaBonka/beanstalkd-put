@@ -18,6 +18,7 @@ int server_port = 11300;
 uint32_t job_priority = UINT32_MAX;
 uint32_t job_delay = 0;
 uint32_t job_ttr = 120;
+int quiet = 0;
 
 void display_help(char *prog)
 {
@@ -30,6 +31,7 @@ void display_help(char *prog)
 	fprintf(stderr, "  -P, --priority  <priority>  job priority, 0=max (%u)\n", job_priority);
 	fprintf(stderr, "  -D, --delay     <delay>     seconds before the job becomes available (%u)\n", job_delay);
 	fprintf(stderr, "  -T, --ttr       <ttr>       seconds to give the job processor (%u)\n", job_ttr);
+	fprintf(stderr, "  -q, --quiet                 do not output job ID\n");
 	fprintf(stderr, "  -h, --help                  display this help\n\n");
 	fprintf(stderr, "If \"job body\" is \"-\", then the body content will be read from stdin.\n\n");
 }
@@ -43,13 +45,14 @@ int process_args(int argc, char **argv)
 		{ "priority", required_argument, 0, 'P' },
 		{ "delay",    required_argument, 0, 'D' },
 		{ "ttr",      required_argument, 0, 'T' },
+		{ "quiet",    no_argument,       0, 'q' },
 		{ "help",     no_argument,       0, 'h' },
 		{ NULL,       0,                 0, 0   }
 	};
 
 	int c;
 
-	while ((c = getopt_long(argc, argv, "t:s:p:P:D:T:h", long_options, NULL)) != -1) {
+	while ((c = getopt_long(argc, argv, "t:s:p:P:D:T:qh", long_options, NULL)) != -1) {
 		switch (c) {
 			case 't':
 				tube_name = optarg;
@@ -96,6 +99,9 @@ int process_args(int argc, char **argv)
 					}
 					return -1;
 				}
+				break;
+			case 'q':
+				quiet = 1;
 				break;
 			default:
 				display_help(argv[0]);
@@ -209,7 +215,9 @@ int main(int argc, char **argv) {
 
 	free(job);
 
-	printf("%ld\n", id);
+	if (quiet == 0) {
+		printf("%ld\n", id);
+	}
 
 	bs_disconnect(socket);
 
